@@ -1,0 +1,120 @@
+╭────────────────────────────────────────────────────────────╮
+│                    SvaklaAI: Project Outline               │
+╰────────────────────────────────────────────────────────────╯
+
+🧠 NAME: SvaklaAI
+🎯 LANGUAGE: C++ (C++23 / Intel OneAPI compatible)
+🖥️ OS Target: Linux-only (optimized for Arch-based distros like CachyOS)
+🧩 Compiler: gcc 14.2.1 / Intel OneAPI Toolchain
+🛠️ Architecture: Modular | Plugin-based | From-scratch
+
+──────────────────────────────────────────────────────────────
+🌐 NETWORKING & ACCESS SYSTEM (Port usage: 992, 776, etc.)
+──────────────────────────────────────────────────────────────
+- Custom built-in HTTP/REST interface on port 992
+- Secondary encrypted websocket for real-time updates on port 776
+- Low-level direct API interface on port 933 (for CLI-only interaction)
+- TLS implementation using OpenSSL or Botan for endpoint security
+- Web control panel (HTML5/CSS + C++-generated, runs via built-in mini-server)
+- Auth via public/private keypair or hashed passphrase
+
+──────────────────────────────────────────────────────────────
+📡 MODULE: External Integration (Search, APIs, Weather, etc.)
+──────────────────────────────────────────────────────────────
+- Integrate Firefox (headless) for data scraping (ASK USER FIRST)
+- Custom-built C++ Firefox controller using dbus or automation bridge
+- RESTful API for weather/news/etc. (calls handled internally or via Firefox)
+- Optional proxy support for cloaked queries
+- Search Engine Preferences: DuckDuckGo, Brave, Google (optional)
+
+──────────────────────────────────────────────────────────────
+🧠 CORE AI ENGINE (Real-Time, No Pretrained Data)
+──────────────────────────────────────────────────────────────
+- From-scratch dynamic learning engine using:
+  - Text vectorization (custom tokenizer/embedding)
+  - Incremental context handling (2B+ characters by streaming buffers)
+  - No pretraining – all context grows from use and interaction
+- Fallback logic + symbolic reasoning for "cold start" queries
+- Full logic/assembly/code generation abilities
+- Generates and compiles code on-the-fly using C++ or Assembly
+- Interfaces with `as`, `ld`, and `gcc` to compile/test kernel-level code
+
+──────────────────────────────────────────────────────────────
+🧩 MODULARITY: Plugins & Extensibility
+──────────────────────────────────────────────────────────────
+- Plugin Manager: Dynamic library (.so) loader from `/opt/svakla/plugins/`
+- Plugins can be:
+  - Math engines
+  - Code checkers
+  - Custom bot personalities
+  - Kernel building support logic
+- Plugins must be signed or manually approved by user
+
+──────────────────────────────────────────────────────────────
+📝 MEMORY & CHAT STORAGE
+──────────────────────────────────────────────────────────────
+- Logs every interaction into encrypted local chat files
+- Directory set by user on first run (`/home/<user>/.svakla/chatlogs/`)
+- Commands:
+  - `review <chatname>` → Displays previous conversation from file
+  - `clear-memory` → Wipes temporary context without deleting logs
+- Stores context in efficient mmap-style files or lightweight DB like LMDB
+
+──────────────────────────────────────────────────────────────
+⚙️ SYSTEM BEHAVIOR
+──────────────────────────────────────────────────────────────
+- Fully interactive CLI
+- GUI runs from lightweight GTK interface (optional)
+- Displays status: temp, load, CPU use, memory
+- Monitors system calls for sandboxing user-defined plugins
+- Optional clipboard sniffing (asks for permission first)
+
+──────────────────────────────────────────────────────────────
+💬 CONVERSATIONALITY
+──────────────────────────────────────────────────────────────
+- Conversational engine uses:
+  - Intent detection (based on real-time word usage)
+  - Emotion hinting via terminal color/highlighting
+  - Variable tone (sarcastic, formal, playful — optional personalities)
+- Responds naturally but transparently ("I’m not human but I adapt fast")
+- Handles deep logic chains and ambiguous commands with clarifying responses
+
+──────────────────────────────────────────────────────────────
+💣 LOW-LEVEL OPS SUPPORT (Like making a Kernel from zero)
+──────────────────────────────────────────────────────────────
+- Access to:
+  - Inline assembly generation
+  - ELF file construction
+  - Raw disk writing (with permission)
+  - VFS module for reading/writing pseudo file systems
+- In-built codebase for example kernels (32-bit, 64-bit)
+- Assistive builder system that writes Makefiles, linker scripts, etc.
+
+──────────────────────────────────────────────────────────────
+🔐 SECURITY
+──────────────────────────────────────────────────────────────
+- UFW rule suggestion generator (based on port use)
+- Self-audit command (`audit-self`) checks for anomalies in system perms
+- Will not send data unless explicitly allowed per query/request
+- Uses user-defined sandbox for dangerous plugin execution
+
+──────────────────────────────────────────────────────────────
+📦 FUTURE EXPANSION PLANS
+──────────────────────────────────────────────────────────────
+- Add optional Vulkan-based GUI front-end
+- Add federated learning modules (with user-owned models)
+- Extend to support full BCI (brain-computer interface) hooks
+- Modular neural graph visualizer to debug "thought patterns"
+
+──────────────────────────────────────────────────────────────
+👣 FIRST INSTALLATION
+──────────────────────────────────────────────────────────────
+- Install script prompts for:
+  - Chatlog path
+  - Plugin folder path
+  - UFW port rule setup
+  - Security permissions
+  - Firefox path check
+- Builds executable `svakla` in `/home/<user>/svakla/` and logs to journal
+
+──────────────────────────────────────────────────────────────
