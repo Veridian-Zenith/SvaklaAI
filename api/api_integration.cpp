@@ -1,21 +1,15 @@
 #include "api_integration.h"
 #include <iostream>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
-APIIntegration::APIIntegration() : initialized(false) {}
-
-APIIntegration::~APIIntegration() {}
-
-bool APIIntegration::initialize() {
-  // TODO: Implement actual initialization
-  initialized = true;
-  return true;
+void initializeAPI() {
+    SSL_library_init();
+    SSL_load_error_strings();
+    OpenSSL_add_all_algorithms();
+    std::cout << "API server initialized." << std::endl;
 }
 
-std::string APIIntegration::executeQuery(const std::string &query) {
-  if (!initialized) {
-    return "Error: API Integration not initialized";
-  }
-
-  // TODO: Implement actual query execution
-  return "Query executed: " + query;
+void handleAPIRequest() {
+    std::cout << "Handling API request." << std::endl;
 }

@@ -1,16 +1,7 @@
-#pragma once
+#ifndef API_INTEGRATION_H
+#define API_INTEGRATION_H
 
-#include <string>
-#include <vector>
+void initializeAPI();
+void handleAPIRequest();
 
-class APIIntegration {
-public:
-  APIIntegration();
-  ~APIIntegration();
-
-  bool initialize();
-  std::string executeQuery(const std::string &query);
-
-private:
-  bool initialized = false;
-};
+#endif // API_INTEGRATION_H

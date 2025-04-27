@@ -1,21 +1,9 @@
-#pragma once
+#ifndef ETHICS_H
+#define ETHICS_H
 
 #include <string>
-#include <vector>
 
-class EthicsSystem {
-public:
-  EthicsSystem();
-  ~EthicsSystem();
+void initializeAuth();
+bool authenticateUser(const std::string& username, const std::string& password);
 
-  bool initialize();
-
-  // Evaluate if an action is ethically permissible
-  bool evaluateAction(const std::string &action, std::string &reason);
-
-  // Get current ethical guidelines
-  std::vector<std::string> getEthicalGuidelines() const;
-
-private:
-  bool initialized;
-};
+#endif // ETHICS_H

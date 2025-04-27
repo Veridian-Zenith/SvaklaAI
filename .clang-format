@@ -1,0 +1,57 @@
+# BasedOnStyle: Google
+# UseTab: Never
+# IndentWidth: 2
+# ColumnLimit: 100
+# BreakBeforeBraces: Attach
+# AllowShortIfStatementsOnASingleLine: false
+# AllowShortFunctionsOnASingleLine: None
+# AllowShortLoopsOnASingleLine: false
+# AllowShortBlocksOnASingleLine: false
+# AlwaysBreakAfterReturnType: None
+# AlwaysBreakBeforeMultilineStrings: true
+# BinPackArguments: true
+# BinPackParameters: true
+# BreakBeforeBinaryOperators: None
+# BreakBeforeTernaryOperators: true
+# BreakConstructorInitializersBeforeComma: false
+# ConstructorInitializerAllOnOneLineOrOnePerLine: true
+# ConstructorInitializerIndentWidth: 4
+# ContinuationIndentWidth: 4
+# Cpp11BracedListStyle: true
+# DerivePointerAlignment: false
+# FixNamespaceComments: true
+# IncludeBlocks: Regroup
+# IndentCaseLabels: false
+# IndentPPDirectives: None
+# IndentWidth: 2
+# KeepEmptyLinesAtTheStartOfBlocks: true
+# MaxEmptyLinesToKeep: 1
+# NamespaceIndentation: None
+# Penalties:
+#   - BreakBeforeAssignment: 100
+#   - BreakBeforeReturnType: 100
+#   - BreakConstructorInitializers: 100
+#   - BreakAfterOperator: 100
+#   - BreakStringLiterals: 100
+#   - BreakBeforeTernaryOperators: 100
+#   - BreakBeforeBinaryOperators: 100
+#   - BreakAlloca: 100
+#   - BreakNewline: 100
+#   - BreakBeforeBraces: 100
+# PointerAlignment: Left
+# ReflowComments: true
+# SortIncludes: true
+# SortUsingDeclarations: true
+# SpaceAfterCStyleCast: false
+# SpaceBeforeAssignmentOperators: true
+# SpaceBeforeParens: ControlStatements
+# SpaceInEmptyParentheses: false
+# SpacesBeforeTrailingComments: 2
+# SpacesInAngles: false
+# SpacesInCStyleCastParentheses: false
+# SpacesInContainerLiterals: true
+# SpacesInParentheses: false
+# SpacesInSquareBrackets: false
+# Standard: Cpp23
+# TabWidth: 2
+# UseTab: Never

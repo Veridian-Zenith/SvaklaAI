@@ -1,18 +1,7 @@
-#pragma once
+#ifndef LOGIC_H
+#define LOGIC_H
 
-#include <memory>
-#include <string>
-#include <vector>
+void initializeMonitoring();
+void monitorSystem();
 
-class LogicEngine {
-public:
-  LogicEngine();
-  ~LogicEngine();
-
-  bool initialize();
-  std::string evaluateExpression(const std::string &expression);
-  bool validateLogic(const std::string &statement, std::string &error);
-
-private:
-  bool initialized = false;
-};
+#endif // LOGIC_H

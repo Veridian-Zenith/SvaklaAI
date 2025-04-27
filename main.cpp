@@ -1,200 +1,168 @@
-#include "api/api_integration.h"
-#include "chat/chat_storage.h"
-#include "ethics/ethics.h"
-#include "logic/logic.h"
-#include "model/reinforcement_learning.h"
-#include "nlp/nlp.h"
-#include "plugins/plugin_manager.h"
-#include "programming/programming.h"
-#include "scraping/web_scraping.h"
-#include "web_interface/web_interface.h"
-#include <boost/asio.hpp>
-#include <boost/program_options.hpp>
-#include <filesystem>
 #include <iostream>
-#include <signal.h>
+#include <string>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #include <thread>
+#include "include/openssl_init.h"
 
-namespace fs = std::filesystem;
-namespace po = boost::program_options;
-
-// Global components
-std::unique_ptr<APIIntegration> g_apiIntegration;
-std::unique_ptr<ChatStorage> g_chatStorage;
-std::unique_ptr<EthicsSystem> g_ethicsEngine;
-std::unique_ptr<LogicEngine> g_logicEngine;
-std::unique_ptr<NLPEngine> g_nlpEngine;
-std::unique_ptr<PluginManager> g_pluginManager;
-std::unique_ptr<ProgrammingEngine> g_programmingEngine;
-std::unique_ptr<ReinforcementLearning> g_rlEngine;
-std::unique_ptr<WebScraper> g_webScraping;
-std::unique_ptr<WebInterface> g_webInterface;
-
-// Global IO context
-boost::asio::io_context g_ioContext;
-bool g_running = true;
-
-void signal_handler(int signal) {
-  if (signal == SIGINT || signal == SIGTERM) {
-    std::cout << "\nShutting down SvaklaAI..." << std::endl;
-    g_running = false;
-    g_ioContext.stop();
-  }
+void start_http_server() {
+    extern void start_server(int port);
+    start_server(992);
 }
 
-void setupDirectories() {
-  const fs::path home = fs::path(getenv("HOME"));
-  const fs::path base = home / "svakla";
-
-  std::vector<fs::path> dirs = {base / "plugins", base / "config",
-                                base / "data", base / "chat", base / "temp"};
-
-  for (const auto &dir : dirs) {
-    if (!fs::exists(dir)) {
-      try {
-        fs::create_directories(dir);
-      } catch (const std::exception &e) {
-        std::cerr << "Failed to create directory " << dir << ": " << e.what()
-                  << std::endl;
-        exit(1);
-      }
-    }
-  }
+void start_websocket_server() {
+    extern void start_server(int port);
+    start_server(776);
 }
 
-void initializeComponents() {
-  const fs::path home = fs::path(getenv("HOME"));
-  const fs::path base = home / "svakla";
-
-  try {
-    // Initialize all components
-    g_apiIntegration = std::make_unique<APIIntegration>();
-    g_chatStorage = std::make_unique<ChatStorage>((base / "chat").string());
-    g_ethicsEngine = std::make_unique<EthicsSystem>();
-    g_logicEngine = std::make_unique<LogicEngine>();
-    g_nlpEngine = std::make_unique<NLPEngine>();
-    g_pluginManager =
-        std::make_unique<PluginManager>((base / "plugins").string());
-    g_programmingEngine = std::make_unique<ProgrammingEngine>();
-    g_rlEngine = std::make_unique<ReinforcementLearning>();
-    g_webScraping = std::make_unique<WebScraper>();
-    g_webInterface = std::make_unique<WebInterface>(g_ioContext);
-
-    // Initialize each component
-    if (!g_apiIntegration->initialize())
-      throw std::runtime_error("Failed to initialize API integration");
-    if (!g_chatStorage->initialize())
-      throw std::runtime_error("Failed to initialize chat storage");
-    if (!g_ethicsEngine->initialize())
-      throw std::runtime_error("Failed to initialize ethics engine");
-    if (!g_logicEngine->initialize())
-      throw std::runtime_error("Failed to initialize logic engine");
-    if (!g_nlpEngine->initialize())
-      throw std::runtime_error("Failed to initialize NLP engine");
-    if (!g_programmingEngine->initialize())
-      throw std::runtime_error("Failed to initialize programming engine");
-    if (!g_rlEngine->initialize())
-      throw std::runtime_error("Failed to initialize reinforcement learning");
-    if (!g_webScraping->initialize())
-      throw std::runtime_error("Failed to initialize web scraping");
-
-    // Load plugins
-    for (const auto &entry : fs::directory_iterator(base / "plugins")) {
-      if (entry.path().extension() == ".so") {
-        if (!g_pluginManager->loadPlugin(entry.path().string())) {
-          std::cerr << "Warning: Failed to load plugin: " << entry.path()
-                    << std::endl;
-        }
-      }
-    }
-
-    // Initialize web interface last
-    if (!g_webInterface->initialize(992, 776, 933)) {
-      throw std::runtime_error("Failed to initialize web interface");
-    }
-
-  } catch (const std::exception &e) {
-    std::cerr << "Failed to initialize components: " << e.what() << std::endl;
-    exit(1);
-  }
+void start_api_server() {
+    extern void start_server(int port);
+    start_server(933);
 }
 
-void cleanup() {
-  // Clean up in reverse order of initialization
-  g_webInterface.reset();
-  g_webScraping.reset();
-  g_rlEngine.reset();
-  g_programmingEngine.reset();
-  g_pluginManager.reset();
-  g_nlpEngine.reset();
-  g_logicEngine.reset();
-  g_ethicsEngine.reset();
-  g_chatStorage.reset();
-  g_apiIntegration.reset();
+void start_web_interface_server() {
+    extern void start_server(int port);
+    start_server(8443); // Custom port for web interface server
 }
 
-int main(int argc, char *argv[]) {
-  try {
-    // Set up signal handling
-    signal(SIGINT, signal_handler);
-    signal(SIGTERM, signal_handler);
+void start_external_service_interface() {
+    extern void start_server(int port);
+    start_server(9999); // Custom port for external service interface
+}
 
-    // Parse command line options
-    po::options_description desc("Allowed options");
-    desc.add_options()("help", "produce help message")("no-web",
-                                                       "disable web interface")(
-        "port", po::value<int>()->default_value(992), "web interface port");
-
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
-
-    if (vm.count("help")) {
-      std::cout << desc << "\n";
-      return 0;
+void authenticate_user() {
+    extern bool authenticate_user(const std::string &public_key_path, const std::string &private_key_path);
+    if (authenticate_user("public.pem", "private.pem")) {
+        std::cout << "User authenticated successfully" << std::endl;
+    } else {
+        std::cout << "User authentication failed" << std::endl;
     }
+}
 
-    std::cout << "Starting SvaklaAI...\n" << std::endl;
+void run_ai_engine() {
+    extern void run_ai_core();
+    run_ai_core();
+}
 
-    // Setup required directories
-    setupDirectories();
+void load_plugins() {
+    extern void load_plugin(const std::string &plugin_name);
+    load_plugin("example_plugin.so");
+}
 
-    // Initialize core components
-    initializeComponents();
+void manage_local_memory() {
+    extern void save_context(const std::string &filename, const std::string &context);
+    extern std::string load_context(const std::string &filename);
+    std::string filename = "context.txt";
+    std::string context = "This is a sample context.";
+    save_context(filename, context);
+    std::string loaded_context = load_context(filename);
+    std::cout << "Loaded context: " << loaded_context << std::endl;
+}
 
-    std::cout << "SvaklaAI initialized successfully!\n" << std::endl;
-    std::cout << "Web interface running on:\n";
-    std::cout << "- HTTP/REST: port 992\n";
-    std::cout << "- WebSocket: port 776\n";
-    std::cout << "- Direct API: port 933\n" << std::endl;
+void run_interactive_shell() {
+    extern void run_shell();
+    run_shell();
+}
 
-    // Run the IO context
-    boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
-        work = boost::asio::make_work_guard(g_ioContext);
+void monitor_system_safety() {
+    extern void monitor_system();
+    extern void monitor_clipboard();
+    monitor_system();
+    monitor_clipboard();
+}
 
-    // Run the io_context on multiple threads
-    std::vector<std::thread> threads;
-    const auto thread_count = std::thread::hardware_concurrency();
-    threads.reserve(thread_count);
+void run_advanced_low_level() {
+    extern void inline_assembler_example();
+    extern void raw_elf_construction();
+    extern void disk_raw_writing();
+    extern void virtual_file_system();
+    extern void kernel_building_helper();
+    inline_assembler_example();
+    raw_elf_construction();
+    disk_raw_writing();
+    virtual_file_system();
+    kernel_building_helper();
+}
 
-    for (unsigned i = 1; i < thread_count; ++i) {
-      threads.emplace_back([&]() { g_ioContext.run(); });
-    }
+void enforce_privacy_security() {
+    extern void enforce_privacy_policy();
+    extern void audit_self();
+    extern void plugin_sandbox();
+    enforce_privacy_policy();
+    audit_self();
+    plugin_sandbox();
+}
 
-    // Run the main thread's io_context
-    g_ioContext.run();
+void run_expansion_modules() {
+    extern void vulkan_gui_frontend();
+    extern void federated_learning();
+    extern void bci_module();
+    extern void neural_graph_visualizer();
+    vulkan_gui_frontend();
+    federated_learning();
+    bci_module();
+    neural_graph_visualizer();
+}
 
-    // Wait for all threads to complete
-    for (auto &thread : threads) {
-      thread.join();
-    }
+void run_installation_system() {
+    extern void confirm_system_paths();
+    extern void verify_networking_components();
+    extern void install_dependencies();
+    extern void apply_firewall_security_profiles();
+    confirm_system_paths();
+    verify_networking_components();
+    install_dependencies();
+    apply_firewall_security_profiles();
+}
 
-    // Cleanup on exit
-    cleanup();
+void run_documentation_system() {
+    std::cout << "Documentation system is running. Check the /usr/local/share/svaklaai/docs/ directory for documentation." << std::endl;
+}
 
+void display_final_summary() {
+    extern void display_final_summary();
+    display_final_summary();
+}
+
+int main() {
+    init_openssl();
+
+    std::thread http_thread(start_http_server);
+    std::thread websocket_thread(start_websocket_server);
+    std::thread api_thread(start_api_server);
+    std::thread web_interface_thread(start_web_interface_server);
+    std::thread auth_thread(authenticate_user);
+    std::thread ai_thread(run_ai_engine);
+    std::thread external_service_thread(start_external_service_interface);
+    std::thread plugin_thread(load_plugins);
+    std::thread memory_thread(manage_local_memory);
+    std::thread shell_thread(run_interactive_shell);
+    std::thread monitor_thread(monitor_system_safety);
+    std::thread advanced_thread(run_advanced_low_level);
+    std::thread privacy_thread(enforce_privacy_security);
+    std::thread expansion_thread(run_expansion_modules);
+    std::thread install_thread(run_installation_system);
+    std::thread doc_thread(run_documentation_system);
+    std::thread summary_thread(display_final_summary);
+
+    http_thread.join();
+    websocket_thread.join();
+    api_thread.join();
+    web_interface_thread.join();
+    auth_thread.join();
+    ai_thread.join();
+    external_service_thread.join();
+    plugin_thread.join();
+    memory_thread.join();
+    shell_thread.join();
+    monitor_thread.join();
+    advanced_thread.join();
+    privacy_thread.join();
+    expansion_thread.join();
+    install_thread.join();
+    doc_thread.join();
+    summary_thread.join();
+
+    cleanup_openssl();
     return 0;
-  } catch (const std::exception &e) {
-    std::cerr << "Fatal error: " << e.what() << std::endl;
-    return 1;
-  }
 }
